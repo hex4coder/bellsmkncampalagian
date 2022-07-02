@@ -1,3 +1,6 @@
+import 'package:bellsmkncampalagian/app/modules/dashboard/views/dashboard_view.dart';
+import 'package:bellsmkncampalagian/app/modules/setjadwal/views/setjadwal_view.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -9,16 +12,21 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('HomeView'),
-        centerTitle: true,
+      body: TabBarView(
+        controller: controller.tabController,
+        children: const [
+          DashboardView(),
+          SetjadwalView(),
+        ],
       ),
-      body: Center(
-        child: Text(
-          'HomeView is working',
-          style: TextStyle(fontSize: 20),
-        ),
-      ),
+      bottomNavigationBar: TabBar(
+          controller: controller.tabController,
+          labelColor: Theme.of(context).primaryColor,
+          unselectedLabelColor: Colors.grey.shade400,
+          tabs: const [
+            Tab(icon: Icon(CupertinoIcons.home), text: 'Dashboard'),
+            Tab(icon: Icon(CupertinoIcons.settings), text: 'Pengaturan Jadwal'),
+          ]),
     );
   }
 }
