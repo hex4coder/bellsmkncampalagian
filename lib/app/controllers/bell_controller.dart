@@ -2,9 +2,28 @@
 
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:bellsmkncampalagian/app/data/jadwal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+
+final listBulan = [
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember'
+];
+
+final listHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
 
 extension DateTimeParsing on DateTime {
   /// Dapatkan jam dan menit dari timestamp
@@ -31,29 +50,7 @@ extension DateTimeParsing on DateTime {
   /// Konversi DateTime ke string dalam bahasa Indonesia
   String getTanggal({bool split = false}) {
     String ret = '';
-    final listBulan = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember'
-    ];
-    final listHari = [
-      'Senin',
-      'Selasa',
-      'Rabu',
-      'Kamis',
-      'Jumat',
-      'Sabtu',
-      'Ahad'
-    ];
+
     final d = this;
     final thn = d.year;
     final bln = listBulan[d.month - 1];
@@ -65,15 +62,6 @@ extension DateTimeParsing on DateTime {
   }
 
   String getHari() {
-    final listHari = [
-      'Senin',
-      'Selasa',
-      'Rabu',
-      'Kamis',
-      'Jumat',
-      'Sabtu',
-      'Ahad'
-    ];
     final d = this;
     final hari = listHari[d.weekday - 1];
     return hari;
@@ -91,24 +79,131 @@ extension on TimeOfDay {
 
 class BellController extends GetxController {
   final _listJadwal = <Jadwal>[].obs;
+  final _listJadwalToday = <Jadwal>[].obs;
   final _isLoading = false.obs;
   final Rx<TimeOfDay> _currentTime = Rx<TimeOfDay>(TimeOfDay.now());
   final Rx<DateTime> _currentDate = Rx<DateTime>(DateTime.now());
+  final AudioPlayer audioPlayer = AudioPlayer();
+  final _box = GetStorage();
+
+  Future<void> play(String selectedTipe) async {
+    await audioPlayer.stop();
+    await audioPlayer.setVolume(1.0);
+    final path = 'sound/$selectedTipe.wav';
+    await audioPlayer.setSourceAsset(path);
+    await audioPlayer.play(AssetSource(path));
+  }
 
   static BellController get instance => Get.find<BellController>();
   bool get isLoading => _isLoading.value;
   List<Jadwal> get listJadwal => _listJadwal;
+  List<Jadwal> get listJadwalToday => _listJadwalToday;
   TimeOfDay get currentTime => _currentTime.value;
   String get jamSekarang => currentTime.toJam();
   String get tanggalSekarang => _currentDate.value.getTanggal();
-  String get hari => _currentDate.value.getHari();
+  String get hari => _currentDate.value.getHari().toLowerCase();
+  List<String> get tipeBell => [
+        'pelajar_pancasila',
+        '5_menit_awal_upacara',
+        '5_menit_awal_kegiatan_keagamaan',
+        '5_menit_awal_jam_ke_1',
+        '5_menit_akhir_istirahat',
+        '5_menit_akhir_istirahat_1',
+        '5_menit_akhir_istirahat_2',
+        'jam_ke_1',
+        'jam_ke_2',
+        'jam_ke_3',
+        'jam_ke_4',
+        'istirahat',
+        'istirahat_1',
+        'istirahat_2',
+        'jam_ke_5',
+        'jam_ke_6',
+        'jam_ke_7',
+        'jam_ke_8',
+        'jam_ke_9',
+        'akhir_pekan_1',
+        'akhir_pekan_2',
+        'akhir_pelajaran_1',
+        'akhir_pelajaran_2',
+      ];
 
   @override
   void onInit() {
-    Timer.periodic(const Duration(seconds: 1), (timer) {
+    Timer.periodic(const Duration(seconds: 1), (timer) async {
       _currentTime.value = TimeOfDay.now();
       _currentDate.value = DateTime.now();
     });
     super.onInit();
+  }
+
+  @override
+  void onReady() {
+    loadAllJadwal().then((value) => _listJadwal.assignAll(value));
+    super.onReady();
+  }
+
+  Future<void> saveNewJadwal(Jadwal jadwal) async {
+    final allJadwal = await loadAllJadwal();
+    List<Jadwal> newData = [...allJadwal, jadwal];
+    await _box.write('jadwal', newData);
+    await _box.save();
+
+    _listJadwal.assignAll(newData);
+    List<Jadwal> list = [];
+
+    if (newData.isNotEmpty) {
+      for (Jadwal jadwal in newData) {
+        if (jadwal.hari == hari) {
+          list.add(jadwal);
+        }
+      }
+    }
+
+    _listJadwalToday.assignAll(list);
+  }
+
+  Future<void> deleteJadwal(Jadwal jadwal) async {
+    List<Jadwal> allJadwal = await loadAllJadwal();
+    allJadwal.removeWhere((e) =>
+        e.hari == jadwal.hari &&
+        e.tipe == jadwal.tipe &&
+        e.waktu == jadwal.waktu);
+    await _box.write('jadwal', allJadwal);
+    await _box.save();
+
+    _listJadwal.assignAll(allJadwal);
+    List<Jadwal> list = [];
+
+    if (allJadwal.isNotEmpty) {
+      for (Jadwal jadwal in allJadwal) {
+        if (jadwal.hari == hari) {
+          list.add(jadwal);
+        }
+      }
+    }
+
+    _listJadwalToday.assignAll(list);
+  }
+
+  Future<List<Jadwal>> loadAllJadwal() async {
+    List<Jadwal> list = [];
+    list = _box.read<List<Jadwal>>('jadwal') ?? [];
+    return list;
+  }
+
+  Future<List<Jadwal>> loadAllJadwalByHari(String hari) async {
+    List<Jadwal> list = [];
+    final allJadwal = await loadAllJadwal();
+
+    if (allJadwal.isNotEmpty) {
+      for (Jadwal jadwal in allJadwal) {
+        if (jadwal.hari == hari) {
+          list.add(jadwal);
+        }
+      }
+    }
+
+    return list;
   }
 }
