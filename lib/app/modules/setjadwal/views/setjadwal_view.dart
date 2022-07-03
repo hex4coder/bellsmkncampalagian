@@ -144,37 +144,39 @@ class SetjadwalView extends GetView<SetjadwalController> {
                   height: double.infinity,
                   color: const Color(0xfffdfdfd),
                   child: Obx(
-                    () => DataTable(
-                        showBottomBorder: true,
-                        columns: const [
-                          DataColumn(label: Text('Hari')),
-                          DataColumn(label: Text('Waktu')),
-                          DataColumn(
-                            label: Text('Tipe Bell'),
-                          ),
-                          DataColumn(
-                            label: Text('Opsi'),
-                          ),
-                        ],
-                        rows: BellController.instance.listJadwal
-                            .map((e) => DataRow(cells: [
-                                  DataCell(Text(e.hari ?? '')),
-                                  DataCell(Text(e.waktu ?? '')),
-                                  DataCell(Text(e.tipe ?? '')),
-                                  DataCell(TextButton.icon(
-                                      onPressed: () => BellController.instance
-                                          .deleteJadwal(e),
-                                      icon: const Icon(
-                                        CupertinoIcons.delete,
-                                        size: 20,
-                                        color: Colors.red,
-                                      ),
-                                      label: const Text(
-                                        'Hapus',
-                                        style: TextStyle(color: Colors.red),
-                                      ))),
-                                ]))
-                            .toList()),
+                    () => SingleChildScrollView(
+                      child: DataTable(
+                          showBottomBorder: true,
+                          columns: const [
+                            DataColumn(label: Text('Hari')),
+                            DataColumn(label: Text('Waktu')),
+                            DataColumn(
+                              label: Text('Tipe Bell'),
+                            ),
+                            DataColumn(
+                              label: Text('Opsi'),
+                            ),
+                          ],
+                          rows: BellController.instance.listJadwal
+                              .map((e) => DataRow(cells: [
+                                    DataCell(Text(e.hari ?? '')),
+                                    DataCell(Text(e.waktu ?? '')),
+                                    DataCell(Text(e.tipe ?? '')),
+                                    DataCell(TextButton.icon(
+                                        onPressed: () => BellController.instance
+                                            .deleteJadwal(e),
+                                        icon: const Icon(
+                                          CupertinoIcons.delete,
+                                          size: 20,
+                                          color: Colors.red,
+                                        ),
+                                        label: const Text(
+                                          'Hapus',
+                                          style: TextStyle(color: Colors.red),
+                                        ))),
+                                  ]))
+                              .toList()),
+                    ),
                   ),
                 ),
               ),
