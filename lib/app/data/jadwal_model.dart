@@ -1,5 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
+import 'package:flutter/material.dart';
+
 enum TipeWaktu {
   PELAJAR_PANCASILA,
   JAMKE_1,
@@ -19,20 +21,20 @@ enum TipeWaktu {
 class Jadwal {
   String? hari;
   TipeWaktu? jamke;
-  String? waktu;
+  TimeOfDay? waktu;
 
   Jadwal({this.hari, this.jamke, this.waktu});
 
   Jadwal.fromJson(Map<String, dynamic> json) {
     hari = json['hari'];
-    jamke = json['jamke'];
-    waktu = json['waktu'];
+    jamke = json['jamke'] ?? TipeWaktu.PELAJAR_PANCASILA;
+    waktu = json['waktu'] ?? TimeOfDay.now();
   }
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
     data['hari'] = hari;
-    data['jamke'] = jamke ?? TipeWaktu.PELAJAR_PANCASILA;
+    data['jamke'] = jamke;
     data['waktu'] = waktu;
     return data;
   }
