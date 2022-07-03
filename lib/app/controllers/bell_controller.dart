@@ -85,12 +85,15 @@ class BellController extends GetxController {
   final Rx<DateTime> _currentDate = Rx<DateTime>(DateTime.now());
   final AudioPlayer audioPlayer = AudioPlayer();
   final _box = GetStorage();
+  final _currentPlaying = ''.obs;
 
   Future<void> play(String selectedTipe) async {
-    await audioPlayer.stop();
-    await audioPlayer.setVolume(1.0);
     final path = 'sound/$selectedTipe.wav';
     await audioPlayer.setSourceAsset(path);
+    await audioPlayer.setVolume(1.0);
+    if (audioPlayer.state == PlayerState.playing) {
+      await audioPlayer.stop();
+    }
     await audioPlayer.play(AssetSource(path));
   }
 
@@ -100,6 +103,7 @@ class BellController extends GetxController {
   List<Jadwal> get listJadwalToday => _listJadwalToday;
   TimeOfDay get currentTime => _currentTime.value;
   String get jamSekarang => currentTime.toJam();
+  String get currentPlaying => _currentPlaying.value;
   String get tanggalSekarang => _currentDate.value.getTanggal();
   String get hari => _currentDate.value.getHari().toLowerCase();
   List<String> get tipeBell => [
@@ -129,10 +133,30 @@ class BellController extends GetxController {
       ];
 
   @override
+  void onClose() {
+    audioPlayer.stop();
+    audioPlayer.dispose();
+    super.onClose();
+  }
+
+  @override
   void onInit() {
-    Timer.periodic(const Duration(seconds: 1), (timer) async {
+    Timer.periodic(const Duration(seconds: 5), (timer) async {
+      _listJadwal.assignAll(await loadAllJadwal());
+      _listJadwalToday.assignAll(await loadAllJadwalByHari(hari));
       _currentTime.value = TimeOfDay.now();
       _currentDate.value = DateTime.now();
+
+      if (listJadwalToday.isNotEmpty) {
+        for (var j in listJadwalToday) {
+          if (jamSekarang == j.waktu!) {
+            if (currentPlaying != j.tipe!) {
+              _currentPlaying.value = j.tipe!;
+              await play(j.tipe!);
+            }
+          }
+        }
+      }
     });
     super.onInit();
   }
@@ -140,6 +164,8 @@ class BellController extends GetxController {
   @override
   void onReady() {
     loadAllJadwal().then((value) => _listJadwal.assignAll(value));
+    loadAllJadwalByHari(hari)
+        .then((value) => _listJadwalToday.assignAll(value));
     super.onReady();
   }
 
@@ -188,7 +214,13 @@ class BellController extends GetxController {
 
   Future<List<Jadwal>> loadAllJadwal() async {
     List<Jadwal> list = [];
-    list = _box.read<List<Jadwal>>('jadwal') ?? [];
+    final l = _box.read<List<dynamic>>('jadwal') ?? [];
+    for (var i in l) {
+      Jadwal jadwal = i is Jadwal ? i : Jadwal.fromJson(i);
+      list.add(jadwal);
+    }
+
+    list.sort((a, b) => a.waktu!.compareTo(b.waktu!));
     return list;
   }
 

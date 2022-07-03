@@ -94,6 +94,16 @@ class DashboardView extends GetView<DashboardController> {
                           ],
                         ),
                         const Divider(),
+                        Obx(
+                          () => Column(
+                              children: BellController.instance.listJadwalToday
+                                  .map((e) => ListTile(
+                                        title: Text(e.waktu ?? ''),
+                                        subtitle: Text(
+                                            e.tipe?.replaceAll('_', ' ') ?? ''),
+                                      ))
+                                  .toList()),
+                        )
                       ],
                     ),
                   )
