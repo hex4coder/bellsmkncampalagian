@@ -86,6 +86,7 @@ class BellController extends GetxController {
   final AudioPlayer audioPlayer = AudioPlayer();
   final _box = GetStorage();
   final _currentPlaying = ''.obs;
+  final _currentTimePlaying = ''.obs;
 
   Future<void> play(String selectedTipe) async {
     final path = 'sound/$selectedTipe.wav';
@@ -104,6 +105,7 @@ class BellController extends GetxController {
   TimeOfDay get currentTime => _currentTime.value;
   String get jamSekarang => currentTime.toJam();
   String get currentPlaying => _currentPlaying.value;
+  String get currentTimePlaying => _currentTimePlaying.value;
   String get tanggalSekarang => _currentDate.value.getTanggal();
   String get hari => _currentDate.value.getHari().toLowerCase();
   List<String> get tipeBell => [
@@ -150,8 +152,9 @@ class BellController extends GetxController {
       if (listJadwalToday.isNotEmpty) {
         for (var j in listJadwalToday) {
           if (jamSekarang == j.waktu!) {
-            if (currentPlaying != j.tipe!) {
+            if (currentPlaying != j.tipe! && currentTimePlaying != j.waktu!) {
               _currentPlaying.value = j.tipe!;
+              _currentTimePlaying.value = j.waktu!;
               await play(j.tipe!);
             }
           }
