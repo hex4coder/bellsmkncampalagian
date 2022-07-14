@@ -152,11 +152,9 @@ class BellController extends GetxController {
       _currentDate.value = DateTime.now();
 
       if (listJadwalToday.isNotEmpty) {
-        bool adaJam = false;
         await Future.forEach(listJadwalToday, (Jadwal j) async {
           if (jamSekarang == j.waktu!) {
             if (currentPlaying != j.tipe! && currentTimePlaying != j.waktu!) {
-              adaJam = true;
               _currentPlaying.value = j.tipe!;
               _currentTimePlaying.value = j.waktu!;
 
@@ -169,27 +167,33 @@ class BellController extends GetxController {
             }
           }
         });
+      }
+    });
 
-        if (!adaJam) {
-          // cek jam jika belum jam 7.30 dan belum masuk
+    ever(_currentDate, (DateTime time) async {
+      // cek jam jika belum jam 7.30 dan belum masuk
 
-          if (currentTime.hour > 7) {
-            _isPlayingPancasila.value = false;
+      if (currentTime.hour > 7) {
+        _isPlayingPancasila.value = false;
+      }
+
+      if (currentTime.hour == 7 && currentTime.minute > 30) {
+        _isPlayingPancasila.value = false;
+      }
+
+      if (isPlayingPancasila) {
+        // pelajar pancasila masih bisa diputar
+        final Duration? dur = await audioPlayer.getCurrentPosition();
+        if (dur != null) {
+          if (dur.inSeconds == 0) {
+            play(tipeBell[0]); // putar pelajar pancasila
           }
-
-          if (currentTime.hour == 7 && currentTime.minute > 30) {
-            _isPlayingPancasila.value = false;
-          }
-
-          if (isPlayingPancasila) {
-            // pelajar pancasila masih bisa diputar
-            if (audioPlayer.state != PlayerState.playing) {
-              await play(tipeBell[0]); // putar pelajar pancasila
-            }
-          }
+        } else {
+          print("Duration null");
         }
       }
     });
+
     super.onInit();
   }
 
