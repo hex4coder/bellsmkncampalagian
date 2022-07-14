@@ -87,6 +87,7 @@ class BellController extends GetxController {
   final _box = GetStorage();
   final _currentPlaying = ''.obs;
   final _currentTimePlaying = ''.obs;
+  final _isPlayingPancasila = true.obs;
 
   Future<void> play(String selectedTipe) async {
     final path = 'sound/$selectedTipe.wav';
@@ -99,6 +100,7 @@ class BellController extends GetxController {
   }
 
   static BellController get instance => Get.find<BellController>();
+  bool get isPlayingPancasila => _isPlayingPancasila.value;
   bool get isLoading => _isLoading.value;
   List<Jadwal> get listJadwal => _listJadwal;
   List<Jadwal> get listJadwalToday => _listJadwalToday;
@@ -150,12 +152,39 @@ class BellController extends GetxController {
       _currentDate.value = DateTime.now();
 
       if (listJadwalToday.isNotEmpty) {
-        for (var j in listJadwalToday) {
+        bool adaJam = false;
+        await Future.forEach(listJadwalToday, (Jadwal j) async {
           if (jamSekarang == j.waktu!) {
             if (currentPlaying != j.tipe! && currentTimePlaying != j.waktu!) {
+              adaJam = true;
               _currentPlaying.value = j.tipe!;
               _currentTimePlaying.value = j.waktu!;
+
+              if (j.tipe!.startsWith('5_menit')) {
+                // sudah lima menit persiapan
+                _isPlayingPancasila.value = false;
+              }
+
               await play(j.tipe!);
+            }
+          }
+        });
+
+        if (!adaJam) {
+          // cek jam jika belum jam 7.30 dan belum masuk
+
+          if (currentTime.hour > 7) {
+            _isPlayingPancasila.value = false;
+          }
+
+          if (currentTime.hour == 7 && currentTime.minute > 30) {
+            _isPlayingPancasila.value = false;
+          }
+
+          if (isPlayingPancasila) {
+            // pelajar pancasila masih bisa diputar
+            if (audioPlayer.state != PlayerState.playing) {
+              await play(tipeBell[0]); // putar pelajar pancasila
             }
           }
         }
@@ -167,8 +196,10 @@ class BellController extends GetxController {
   @override
   void onReady() {
     loadAllJadwal().then((value) => _listJadwal.assignAll(value));
-    loadAllJadwalByHari(hari)
-        .then((value) => _listJadwalToday.assignAll(value));
+    loadAllJadwalByHari(hari).then((value) {
+      _listJadwalToday.assignAll(value);
+      // lakukan listening terhadap data
+    });
     super.onReady();
   }
 
