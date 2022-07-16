@@ -148,6 +148,14 @@ class BellController extends GetxController {
     Timer.periodic(const Duration(seconds: 5), (timer) async {
       _listJadwal.assignAll(await loadAllJadwal());
       _listJadwalToday.assignAll(await loadAllJadwalByHari(hari));
+      final ct = TimeOfDay.now();
+      if (ct.hour > 7) {
+        _isPlayingPancasila.value = false;
+      }
+
+      if (ct.hour == 7 && ct.minute > 30) {
+        _isPlayingPancasila.value = false;
+      }
       _currentTime.value = TimeOfDay.now();
       _currentDate.value = DateTime.now();
 
@@ -158,7 +166,7 @@ class BellController extends GetxController {
               _currentPlaying.value = j.tipe!;
               _currentTimePlaying.value = j.waktu!;
 
-              if (j.tipe!.startsWith('5_menit')) {
+              if (j.tipe!.startsWith('jam_ke')) {
                 // sudah lima menit persiapan
                 _isPlayingPancasila.value = false;
               }
