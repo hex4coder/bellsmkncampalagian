@@ -14,3 +14,7 @@ Cukup download saja file bundle versi release didalamnya terdapat file executabl
 ```
   bellsmkncampalagian
 ```
+## Screenshots
+![Dashboard](https://github.com/hex4coder/bellsmkncampalagian/raw/master/screenshots/dashboard.png)
+![Form Autentikasi](https://github.com/hex4coder/bellsmkncampalagian/raw/master/screenshots/auth-form.png)
+![Set Jadwal](https://github.com/hex4coder/bellsmkncampalagian/raw/master/screenshots/set-jadwal.png)
