@@ -174,8 +174,8 @@ class BellController extends GetxController {
 
   // check loop status
   Future checkLoopStatus() async {
-    bool isLoop = _box.read(KEY_LOOP_LAGU_NASIONAL);
-    setLoopLaguNasional(isLoop);
+    bool? isLoop = _box.read(KEY_LOOP_LAGU_NASIONAL);
+    setLoopLaguNasional(isLoop ?? false);
   }
 
   // update status pulang
