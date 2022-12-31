@@ -14,6 +14,23 @@ Cukup download saja file bundle versi release didalamnya terdapat file executabl
 ```
   bellsmkncampalagian
 ```
+
+Klik 2x pada file diatas dan jika tidak bisa silahkan buka terminal (pada folder executable tersebut) dan ketikkan
+
+**Menjalankan aplikasi**
+```
+  ./bellsmkncampalagian
+```
+
+Jika muncul error atau aplikasi tidak berjalan, atur permission file tersebut agar menjadi executable
+
+**Set permission file**
+```
+chmod +x ./bellsmkncampalagian
+```
+
+Lalu jalankan kembali file executable tersebut.
+
 ## Screenshots
 **Tampilan Dashboard**
 
