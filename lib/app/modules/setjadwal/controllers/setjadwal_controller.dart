@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bellsmkncampalagian/app/controllers/bell_controller.dart';
 import 'package:bellsmkncampalagian/app/data/jadwal_model.dart';
@@ -20,11 +22,23 @@ class SetjadwalController extends GetxController {
   final Rx<TimeOfDay> _currentTimeSelected = Rx<TimeOfDay>(TimeOfDay.now());
   final RxString _selectedTipe = RxString(BellController.instance.tipeBell[0]);
   final _isPlaying = false.obs;
+  final _showForm = false.obs;
+  final TextEditingController passwordController = TextEditingController();
+
+  final List<String> _listLaguNasional = [
+    'bagimu_negeri',
+    'bangun_pemuda_pemudi',
+    'berkibarlah_benderaku',
+    'halo_halo_bandung',
+    'maju_tak_gentar',
+    'syukur_nasional'
+  ];
 
   TimeOfDay get selectedTime => _currentTimeSelected.value;
   String get jam => selectedTime.toJam();
   String get selectedTipe => _selectedTipe.value;
   bool get isPlaying => _isPlaying.value;
+  bool get showForm => _showForm.value;
 
   @override
   void onInit() {
@@ -32,6 +46,24 @@ class SetjadwalController extends GetxController {
       _isPlaying.value = event == PlayerState.playing;
     });
     super.onInit();
+  }
+
+  void login() {
+    final password = passwordController.text;
+    if (password != 'ua4ever') {
+      Get.snackbar('Error', 'Password tidak valid !',
+          backgroundColor: Colors.red.shade100, colorText: Colors.red.shade500);
+    } else {
+      Get.snackbar('Sukses', 'Autentikasi berhasil.',
+          backgroundColor: Colors.green.shade100,
+          colorText: Colors.green.shade500);
+      passwordController.text = '';
+      setShowForm(true);
+    }
+  }
+
+  void setShowForm(bool v) {
+    _showForm.value = v;
   }
 
   void setSelectedTipe(String newTipe) {
@@ -45,9 +77,24 @@ class SetjadwalController extends GetxController {
   Future<void> play() async {
     await audioPlayer.stop();
     await audioPlayer.setVolume(1.0);
-    final path = 'sound/$selectedTipe.wav';
-    await audioPlayer.setSourceAsset(path);
-    await audioPlayer.play(AssetSource(path));
+
+    // jika lagu acak
+    if (selectedTipe ==
+        BellController
+            .instance.tipeBell[BellController.instance.tipeBell.length - 1]) {
+      final r = Random().nextInt(_listLaguNasional.length);
+      final laguNasional = _listLaguNasional[r];
+
+      final path = 'sound/lagu_nasional/$laguNasional.mp3';
+      await audioPlayer.setSourceAsset(path);
+      await audioPlayer.play(AssetSource(path));
+    }
+    // jika bukan lagu acak nasional
+    else {
+      final path = 'sound/$selectedTipe.wav';
+      await audioPlayer.setSourceAsset(path);
+      await audioPlayer.play(AssetSource(path));
+    }
   }
 
   Future<void> stop() async {

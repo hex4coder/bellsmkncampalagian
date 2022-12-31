@@ -24,4 +24,5 @@ dev_dependencies:
 flutter:
   assets:
     - assets/sound/
+    - assets/sound/lagu_nasional/
   uses-material-design: true

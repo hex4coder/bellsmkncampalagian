@@ -134,6 +134,7 @@ class BellController extends GetxController {
         'akhir_pekan_2',
         'akhir_pelajaran_1',
         'akhir_pelajaran_2',
+        'lagu_nasional_acak'
       ];
 
   @override
