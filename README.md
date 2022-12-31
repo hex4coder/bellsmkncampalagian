@@ -15,6 +15,11 @@ Cukup download saja file bundle versi release didalamnya terdapat file executabl
   bellsmkncampalagian
 ```
 ## Screenshots
+**Tampilan Dashboard**
 ![Dashboard](https://github.com/hex4coder/bellsmkncampalagian/raw/master/screenshots/dashboard.png)
+
+**Tampilan Autentikasi Untuk Masuk Pengaturan**
 ![Form Autentikasi](https://github.com/hex4coder/bellsmkncampalagian/raw/master/screenshots/auth-form.png)
+
+**Tampilan Pengaturan Jam Bell**
 ![Set Jadwal](https://github.com/hex4coder/bellsmkncampalagian/raw/master/screenshots/set-jadwal.png)
