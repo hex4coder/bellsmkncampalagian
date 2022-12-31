@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_this
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bellsmkncampalagian/app/data/jadwal_model.dart';
@@ -90,7 +91,20 @@ class BellController extends GetxController {
   final _isPlayingPancasila = true.obs;
 
   Future<void> play(String selectedTipe) async {
-    final path = 'sound/$selectedTipe.wav';
+    String path = '';
+    // jika lagu acak
+    if (selectedTipe ==
+        BellController
+            .instance.tipeBell[BellController.instance.tipeBell.length - 1]) {
+      final r = Random().nextInt(_listLaguNasional.length);
+      final laguNasional = _listLaguNasional[r];
+      path = 'sound/lagu_nasional/$laguNasional.mp3';
+    }
+    // jika bukan lagu acak nasional
+    else {
+      path = 'sound/$selectedTipe.wav';
+    }
+
     await audioPlayer.setSourceAsset(path);
     await audioPlayer.setVolume(1.0);
     if (audioPlayer.state == PlayerState.playing) {
@@ -136,6 +150,15 @@ class BellController extends GetxController {
         'akhir_pelajaran_2',
         'lagu_nasional_acak'
       ];
+
+  final List<String> _listLaguNasional = [
+    'bagimu_negeri',
+    'bangun_pemuda_pemudi',
+    'berkibarlah_benderaku',
+    'halo_halo_bandung',
+    'maju_tak_gentar',
+    'syukur_nasional'
+  ];
 
   @override
   void onClose() {
