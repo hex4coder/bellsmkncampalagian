@@ -9,4 +9,5 @@ Berikut adalah distro linux yang kami tes :
 4. Nobara OS
 
 ## Instalasi
-Cukup download saja file bundle versi release didalamnya terdapat file executable bellsmkncampalagian
+Cukup download saja file bundle versi release didalamnya terdapat file executable 
+  bellsmkncampalagian
