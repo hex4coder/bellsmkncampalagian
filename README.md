@@ -10,4 +10,7 @@ Berikut adalah distro linux yang kami tes :
 
 ## Instalasi
 Cukup download saja file bundle versi release didalamnya terdapat file executable 
+
+```
   bellsmkncampalagian
+```
