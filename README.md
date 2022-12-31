@@ -1,16 +1,12 @@
 # bellsmkncampalagian
+Dari Ardan, S.Kom untuk Sekolah terkhusus untuk sekolah kami yaitu SMKN Campalagian (http://www.smkncampalagian.sch.id)
+Ini adalah project yang dibuat menggunakan Flutter dan saat ini jalan pada sistem operasi Linux.
 
-A new Flutter project.
+Berikut adalah distro linux yang kami tes :
+1. Ubuntu
+2. Fedora
+3. Kali Linux
+4. Nobara OS
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Instalasi
+Cukup download saja file bundle versi release didalamnya terdapat file executable bellsmkncampalagian
