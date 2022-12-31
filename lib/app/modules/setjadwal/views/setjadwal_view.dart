@@ -175,14 +175,33 @@ class SetjadwalView extends GetView<SetjadwalController> {
                           const SizedBox(
                             height: 32,
                           ),
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 32, vertical: 16),
-                            ),
-                            onPressed: controller.submitForm,
-                            icon: const Icon(CupertinoIcons.calendar_today),
-                            label: const Text('Simpan Jadwal'),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 32, vertical: 16),
+                                ),
+                                onPressed: controller.submitForm,
+                                icon: const Icon(CupertinoIcons.calendar_today),
+                                label: const Text('Simpan Jadwal'),
+                              ),
+                              Obx(() => Row(
+                                    children: [
+                                      const Text("Loop Lagu Nasional"),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Switch.adaptive(
+                                          value: BellController
+                                              .instance.isLaguNasionalLoop,
+                                          onChanged: (bool v) => BellController
+                                              .instance
+                                              .setLoopLaguNasional(v)),
+                                    ],
+                                  )),
+                            ],
                           ),
                           const SizedBox(
                             height: 32,

@@ -89,6 +89,8 @@ class BellController extends GetxController {
   final _currentPlaying = ''.obs;
   final _currentTimePlaying = ''.obs;
   final _isPlayingPancasila = true.obs;
+  final _isLaguNasionalLoop = false.obs;
+  final _isSudahPulang = false.obs;
 
   Future<void> play(String selectedTipe) async {
     String path = '';
@@ -114,6 +116,8 @@ class BellController extends GetxController {
   }
 
   static BellController get instance => Get.find<BellController>();
+  bool get isSudahPulang => _isSudahPulang.value;
+  bool get isLaguNasionalLoop => _isLaguNasionalLoop.value;
   bool get isPlayingPancasila => _isPlayingPancasila.value;
   bool get isLoading => _isLoading.value;
   List<Jadwal> get listJadwal => _listJadwal;
@@ -160,6 +164,25 @@ class BellController extends GetxController {
     'syukur_nasional'
   ];
 
+  final String KEY_LOOP_LAGU_NASIONAL = 'loop-nasional';
+
+  // update status loop lagu nasional
+  void setLoopLaguNasional(bool loop) {
+    _isLaguNasionalLoop.value = loop;
+    _box.write(KEY_LOOP_LAGU_NASIONAL, loop).then((value) => _box.save());
+  }
+
+  // check loop status
+  Future checkLoopStatus() async {
+    bool isLoop = _box.read(KEY_LOOP_LAGU_NASIONAL);
+    setLoopLaguNasional(isLoop);
+  }
+
+  // update status pulang
+  void setSudahPulang(bool p) {
+    _isSudahPulang.value = p;
+  }
+
   @override
   void onClose() {
     audioPlayer.stop();
@@ -172,6 +195,10 @@ class BellController extends GetxController {
     Timer.periodic(const Duration(seconds: 5), (timer) async {
       _listJadwal.assignAll(await loadAllJadwal());
       _listJadwalToday.assignAll(await loadAllJadwalByHari(hari));
+
+      // check loop lagu nasional
+      await checkLoopStatus();
+
       final ct = TimeOfDay.now();
       if (ct.hour > 7) {
         _isPlayingPancasila.value = false;
@@ -183,6 +210,17 @@ class BellController extends GetxController {
       _currentTime.value = TimeOfDay.now();
       _currentDate.value = DateTime.now();
 
+      if (isSudahPulang) {
+        if (isLaguNasionalLoop) {
+          final Duration? dur = await audioPlayer.getCurrentPosition();
+          if (dur != null) {
+            if (dur.inSeconds == 0) {
+              play(tipeBell[tipeBell.length - 1]); // putar lagu nasional
+            }
+          }
+        }
+      }
+
       if (listJadwalToday.isNotEmpty) {
         await Future.forEach(listJadwalToday, (Jadwal j) async {
           if (jamSekarang == j.waktu!) {
@@ -193,6 +231,9 @@ class BellController extends GetxController {
               if (j.tipe!.startsWith('jam_ke')) {
                 // sudah lima menit persiapan
                 _isPlayingPancasila.value = false;
+              } else if (j.tipe!.startsWith('akhir')) {
+                // sudah jam pulang
+                setSudahPulang(true);
               }
 
               await play(j.tipe!);
