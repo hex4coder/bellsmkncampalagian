@@ -25,6 +25,15 @@ final listBulan = [
 ];
 
 final listHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Ahad'];
+final listHari2 = [
+  'senin',
+  'selasa',
+  'rabu',
+  'kamis',
+  'jumat',
+  'sabtu',
+  'ahad'
+];
 
 extension DateTimeParsing on DateTime {
   /// Dapatkan jam dan menit dari timestamp
@@ -92,6 +101,8 @@ class BellController extends GetxController {
   final _isLaguNasionalLoop = false.obs;
   final _isSudahPulang = false.obs;
 
+  final _swapMarsPancasila = false.obs; // mars smk pancasila
+
   Future<void> play(String selectedTipe) async {
     String path = '';
     // jika lagu acak
@@ -130,6 +141,7 @@ class BellController extends GetxController {
   String get hari => _currentDate.value.getHari().toLowerCase();
   List<String> get tipeBell => [
         'pelajar_pancasila',
+        'mars_smk',
         '5_menit_awal_upacara',
         '5_menit_awal_kegiatan_keagamaan',
         '5_menit_awal_jam_ke_1',
@@ -148,6 +160,11 @@ class BellController extends GetxController {
         'jam_ke_7',
         'jam_ke_8',
         'jam_ke_9',
+        'jam_ke_10',
+        'jam_ke_11',
+        'jam_ke_12',
+        'jam_ke_13',
+        'jam_ke_14',
         'akhir_pekan_1',
         'akhir_pekan_2',
         'akhir_pelajaran_1',
@@ -259,7 +276,9 @@ class BellController extends GetxController {
         final Duration? dur = await audioPlayer.getCurrentPosition();
         if (dur != null) {
           if (dur.inSeconds == 0) {
-            play(tipeBell[0]); // putar pelajar pancasila
+            _swapMarsPancasila.value = !_swapMarsPancasila.value;
+            int indexP = _swapMarsPancasila.value ? 1 : 0;
+            play(tipeBell[indexP]); // putar pelajar pancasila atau mars smk
           }
         } else {
           print("Duration null");
@@ -330,8 +349,6 @@ class BellController extends GetxController {
       Jadwal jadwal = i is Jadwal ? i : Jadwal.fromJson(i);
       list.add(jadwal);
     }
-
-    list.sort((a, b) => a.waktu!.compareTo(b.waktu!));
     return list;
   }
 
