@@ -114,7 +114,9 @@ class BellController extends GetxController {
       path = 'sound/lagu_nasional/$laguNasional.mp3';
     }
     // jika bukan lagu acak nasional
-    else {
+    else if (selectedTipe == 'ayo_senam') {
+      path = 'sound/$selectedTipe.mp3';
+    } else {
       path = 'sound/$selectedTipe.wav';
     }
 
@@ -142,6 +144,7 @@ class BellController extends GetxController {
   List<String> get tipeBell => [
         'pelajar_pancasila',
         'mars_smk',
+        'ayo_senam',
         '5_menit_awal_upacara',
         '5_menit_awal_kegiatan_keagamaan',
         '5_menit_awal_jam_ke_1',
@@ -169,7 +172,7 @@ class BellController extends GetxController {
         'akhir_pekan_2',
         'akhir_pelajaran_1',
         'akhir_pelajaran_2',
-        'lagu_nasional_acak'
+        'lagu_nasional_acak',
       ];
 
   final List<String> _listLaguNasional = [
@@ -281,7 +284,7 @@ class BellController extends GetxController {
             play(tipeBell[indexP]); // putar pelajar pancasila atau mars smk
           }
         } else {
-          print("Duration null");
+          // print("Duration null");
         }
       }
     });
