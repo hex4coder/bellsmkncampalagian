@@ -1,0 +1,433 @@
+{
+  "jadwal": [
+    {
+      "hari":"senin",
+      "tipe":"ayo_senam",
+      "waktu":"07:20"
+    },
+    {
+      "hari": "senin",
+      "tipe": "5_menit_awal_upacara",
+      "waktu": "07:25"
+    },
+    {
+      "hari": "senin",
+      "tipe": "5_menit_awal_jam_ke_1",
+      "waktu": "08:05"
+    },
+    {
+      "hari": "senin",
+      "tipe": "jam_ke_1",
+      "waktu": "08:10"
+    },
+    {
+      "hari": "senin",
+      "tipe": "jam_ke_2",
+      "waktu": "08:50"
+    },
+    {
+      "hari": "senin",
+      "tipe": "istirahat_1",
+      "waktu": "09:30"
+    },
+    {
+      "hari": "senin",
+      "tipe": "5_menit_akhir_istirahat_1",
+      "waktu": "09:40"
+    },
+    {
+      "hari": "senin",
+      "tipe": "jam_ke_3",
+      "waktu": "09:45"
+    },
+    {
+      "hari": "senin",
+      "tipe": "jam_ke_4",
+      "waktu": "10:25"
+    },
+    {
+      "hari": "senin",
+      "tipe": "jam_ke_5",
+      "waktu": "11:05"
+    },
+    {
+      "hari": "senin",
+      "tipe": "jam_ke_6",
+      "waktu": "11:45"
+    },
+    {
+      "hari": "senin",
+      "tipe": "istirahat_2",
+      "waktu": "12:25"
+    },
+    {
+      "hari": "senin",
+      "tipe": "5_menit_akhir_istirahat_2",
+      "waktu": "12:50"
+    },
+    {
+      "hari": "senin",
+      "tipe": "jam_ke_7",
+      "waktu": "12:55"
+    },
+    {
+      "hari": "senin",
+      "tipe": "jam_ke_8",
+      "waktu": "13:35"
+    },
+    {
+      "hari": "senin",
+      "tipe": "jam_ke_9",
+      "waktu": "14:15"
+    },
+    {
+      "hari": "senin",
+      "tipe": "akhir_pelajaran_1",
+      "waktu": "14:55"
+    },
+    {
+      "hari":"selasa",
+      "tipe":"ayo_senam",
+      "waktu":"07:20"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "5_menit_awal_jam_ke_1",
+      "waktu": "07:25"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_1",
+      "waktu": "07:30"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_2",
+      "waktu": "08:10"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_3",
+      "waktu": "08:50"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "istirahat_1",
+      "waktu": "09:30"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "5_menit_akhir_istirahat_1",
+      "waktu": "09:40"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_4",
+      "waktu": "09:45"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_5",
+      "waktu": "10:25"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_6",
+      "waktu": "11:05"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_7",
+      "waktu": "11:45"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "istirahat_2",
+      "waktu": "12:25"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "5_menit_akhir_istirahat_2",
+      "waktu": "12:50"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_8",
+      "waktu": "12:55"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_9",
+      "waktu": "13:35"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_10",
+      "waktu": "14:15"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "jam_ke_11",
+      "waktu": "14:55"
+    },
+    {
+      "hari": "selasa",
+      "tipe": "akhir_pelajaran_2",
+      "waktu": "15:35"
+    },
+
+    {
+      "hari":"rabu",
+      "tipe":"ayo_senam",
+      "waktu":"07:20"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "5_menit_awal_jam_ke_1",
+      "waktu": "07:25"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_1",
+      "waktu": "07:30"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_2",
+      "waktu": "08:10"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_3",
+      "waktu": "08:50"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "istirahat_1",
+      "waktu": "09:30"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "5_menit_akhir_istirahat_1",
+      "waktu": "09:40"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_4",
+      "waktu": "09:45"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_5",
+      "waktu": "10:25"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_6",
+      "waktu": "11:05"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_7",
+      "waktu": "11:45"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "istirahat_2",
+      "waktu": "12:25"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "5_menit_akhir_istirahat_2",
+      "waktu": "12:50"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_8",
+      "waktu": "12:55"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_9",
+      "waktu": "13:35"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_10",
+      "waktu": "14:15"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "jam_ke_11",
+      "waktu": "14:55"
+    },
+    {
+      "hari": "rabu",
+      "tipe": "akhir_pelajaran_1",
+      "waktu": "15:35"
+    },
+
+    {
+      "hari":"kamis",
+      "tipe":"ayo_senam",
+      "waktu":"07:20"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "5_menit_awal_jam_ke_1",
+      "waktu": "07:25"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_1",
+      "waktu": "07:30"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_2",
+      "waktu": "08:10"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_3",
+      "waktu": "08:50"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "istirahat_1",
+      "waktu": "09:30"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "5_menit_akhir_istirahat_1",
+      "waktu": "09:40"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_4",
+      "waktu": "09:45"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_5",
+      "waktu": "10:25"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_6",
+      "waktu": "11:05"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_7",
+      "waktu": "11:45"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "istirahat_2",
+      "waktu": "12:25"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "5_menit_akhir_istirahat_2",
+      "waktu": "12:50"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_8",
+      "waktu": "12:55"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_9",
+      "waktu": "13:35"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_10",
+      "waktu": "14:15"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "jam_ke_11",
+      "waktu": "14:55"
+    },
+    {
+      "hari": "kamis",
+      "tipe": "akhir_pelajaran_2",
+      "waktu": "15:35"
+    },
+    {
+      "hari":"jumat",
+      "tipe":"ayo_senam",
+      "waktu":"07:20"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "5_menit_awal_jam_ke_1",
+      "waktu": "07:25"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "jam_ke_1",
+      "waktu": "07:30"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "jam_ke_2",
+      "waktu": "08:10"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "jam_ke_3",
+      "waktu": "08:50"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "istirahat_1",
+      "waktu": "09:30"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "5_menit_akhir_istirahat_1",
+      "waktu": "09:40"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "jam_ke_4",
+      "waktu": "09:45"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "jam_ke_5",
+      "waktu": "10:25"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "istirahat_2",
+      "waktu": "11:05"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "5_menit_akhir_istirahat_2",
+      "waktu": "13:30"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "jam_ke_6",
+      "waktu": "13:35"
+    },
+    {
+      "hari": "jumat",
+      "tipe": "jam_ke_7",
+      "waktu": "14:15"
+    },
+
+    {
+      "hari": "jumat",
+      "tipe": "akhir_pekan_1",
+      "waktu": "14:55"
+    }
+  ],
+  "loop-nasional": true
+}
