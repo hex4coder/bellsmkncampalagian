@@ -85,7 +85,7 @@ class DashboardView extends GetView<DashboardController> {
                             ),
                             Obx(
                               () => Text(
-                                'Bell hari ini : ${BellController.instance.hari} ${BellController.instance.isLaguNasionalLoop ? "=> L" : "=> NL"}',
+                                'Bell hari ini : ${BellController.instance.hari} ${BellController.instance.isLoopActivated ? "=> L" : "=> NL"}',
                                 style: GoogleFonts.pacifico(
                                   color: Theme.of(context).primaryColor,
                                 ),

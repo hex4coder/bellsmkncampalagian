@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:math';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_native_type_patch.dart';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bellsmkncampalagian/app/data/jadwal_model.dart';
@@ -97,11 +98,12 @@ class BellController extends GetxController {
   final _box = GetStorage();
   final _currentPlaying = ''.obs;
   final _currentTimePlaying = ''.obs;
-  final _isPlayingPancasila = true.obs;
+  final _isBelumMasuk = true.obs;
   final _isLaguNasionalLoop = false.obs;
   final _isSudahPulang = false.obs;
+  
 
-  final _swapMarsPancasila = false.obs; // mars smk pancasila
+  //final _swapMarsPancasila = false.obs; // mars smk pancasila
 
   Future<void> play(String selectedTipe) async {
     String path = '';
@@ -114,9 +116,7 @@ class BellController extends GetxController {
       path = 'sound/lagu_nasional/$laguNasional.mp3';
     }
     // jika bukan lagu acak nasional
-    else if (selectedTipe == 'ayo_senam') {
-      path = 'sound/$selectedTipe.mp3';
-    } else {
+    else {
       path = 'sound/$selectedTipe.wav';
     }
 
@@ -130,8 +130,8 @@ class BellController extends GetxController {
 
   static BellController get instance => Get.find<BellController>();
   bool get isSudahPulang => _isSudahPulang.value;
-  bool get isLaguNasionalLoop => _isLaguNasionalLoop.value;
-  bool get isPlayingPancasila => _isPlayingPancasila.value;
+  bool get isLoopActivated => _isLaguNasionalLoop.value;
+  bool get isPlayingBelumMasuk => _isBelumMasuk.value;
   bool get isLoading => _isLoading.value;
   List<Jadwal> get listJadwal => _listJadwal;
   List<Jadwal> get listJadwalToday => _listJadwalToday;
@@ -145,6 +145,7 @@ class BellController extends GetxController {
         'pelajar_pancasila',
         'mars_smk',
         'ayo_senam',
+        'sholawat_jibril',
         '5_menit_awal_upacara',
         '5_menit_awal_kegiatan_keagamaan',
         '5_menit_awal_jam_ke_1',
@@ -184,18 +185,18 @@ class BellController extends GetxController {
     'syukur_nasional'
   ];
 
-  final String KEY_LOOP_LAGU_NASIONAL = 'loop-nasional';
+  final String KEY_LOOP_ACTIVATED = 'loop-activated';
 
   // update status loop lagu nasional
-  void setLoopLaguNasional(bool loop) {
+  void setLoopIsActive(bool loop) {
     _isLaguNasionalLoop.value = loop;
-    _box.write(KEY_LOOP_LAGU_NASIONAL, loop).then((value) => _box.save());
+    _box.write(KEY_LOOP_ACTIVATED, loop).then((value) => _box.save());
   }
 
   // check loop status
   Future checkLoopStatus() async {
-    bool? isLoop = _box.read(KEY_LOOP_LAGU_NASIONAL);
-    setLoopLaguNasional(isLoop ?? false);
+    bool? isLoop = _box.read(KEY_LOOP_ACTIVATED);
+    setLoopIsActive(isLoop ?? false);
   }
 
   // update status pulang
@@ -221,21 +222,27 @@ class BellController extends GetxController {
 
       final ct = TimeOfDay.now();
       if (ct.hour > 7) {
-        _isPlayingPancasila.value = false;
+        _isBelumMasuk.value = false;
       }
 
-      if (ct.hour == 7 && ct.minute > 30) {
-        _isPlayingPancasila.value = false;
+      else if (ct.hour == 7 && ct.minute >= 30) {
+        _isBelumMasuk.value = false;
+      } else {
+        _isBelumMasuk.value = true;
       }
       _currentTime.value = TimeOfDay.now();
       _currentDate.value = DateTime.now();
 
       if (isSudahPulang) {
-        if (isLaguNasionalLoop) {
+        if (isLoopActivated) {
           final Duration? dur = await audioPlayer.getCurrentPosition();
           if (dur != null) {
             if (dur.inSeconds == 0) {
-              play(tipeBell[tipeBell.length - 1]); // putar lagu nasional
+              // nonaktifkan bell nasional
+              // play(tipeBell[tipeBell.length - 1]); // putar lagu nasional
+
+              // aktifkan sholawat
+              _playSholawat();
             }
           }
         }
@@ -250,13 +257,14 @@ class BellController extends GetxController {
 
               if (j.tipe!.startsWith('jam_ke')) {
                 // sudah lima menit persiapan
-                _isPlayingPancasila.value = false;
+                _isBelumMasuk.value = true;
               } else if (j.tipe!.startsWith('akhir')) {
                 // sudah jam pulang
                 setSudahPulang(true);
+              } else {
+                await play(j.tipe!);
               }
 
-              await play(j.tipe!);
             }
           }
         });
@@ -267,21 +275,25 @@ class BellController extends GetxController {
       // cek jam jika belum jam 7.30 dan belum masuk
 
       if (currentTime.hour > 7) {
-        _isPlayingPancasila.value = false;
+        _isBelumMasuk.value = false;
       }
 
-      if (currentTime.hour == 7 && currentTime.minute > 30) {
-        _isPlayingPancasila.value = false;
+      if (currentTime.hour == 7 && currentTime.minute >= 30) {
+        _isBelumMasuk.value = false;
       }
 
-      if (isPlayingPancasila) {
+      if (isPlayingBelumMasuk) {
         // pelajar pancasila masih bisa diputar
         final Duration? dur = await audioPlayer.getCurrentPosition();
         if (dur != null) {
           if (dur.inSeconds == 0) {
-            _swapMarsPancasila.value = !_swapMarsPancasila.value;
-            int indexP = _swapMarsPancasila.value ? 1 : 0;
-            play(tipeBell[indexP]); // putar pelajar pancasila atau mars smk
+            // ini saya nonaktifkan untuk penyesuaian kepsek baru
+            // _swapMarsPancasila.value = !_swapMarsPancasila.value;
+            // int indexP = _swapMarsPancasila.value ? 1 : 0;
+            // play(tipeBell[indexP]); // putar pelajar pancasila atau mars smk
+
+            // buat aturan baru untuk play sholawat
+            _playSholawat();
           }
         } else {
           // print("Duration null");
@@ -290,6 +302,16 @@ class BellController extends GetxController {
     });
 
     super.onInit();
+  }
+
+
+  // fungsi untuk putar sholawat
+  void _playSholawat() {
+    int indexSholawat = tipeBell.indexOf("sholawat_jibril");
+    if(_isBelumMasuk.value || isSudahPulang) {
+      // belum masuk jadi bisa putar sholawat
+      play(tipeBell[indexSholawat]);
+    }
   }
 
   @override

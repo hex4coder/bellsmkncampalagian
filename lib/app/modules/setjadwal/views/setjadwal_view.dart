@@ -195,10 +195,10 @@ class SetjadwalView extends GetView<SetjadwalController> {
                                       ),
                                       Switch.adaptive(
                                           value: BellController
-                                              .instance.isLaguNasionalLoop,
+                                              .instance.isLoopActivated,
                                           onChanged: (bool v) => BellController
                                               .instance
-                                              .setLoopLaguNasional(v)),
+                                              .setLoopIsActive(v)),
                                     ],
                                   )),
                             ],
