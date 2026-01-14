@@ -175,8 +175,10 @@ class SetjadwalView extends GetView<SetjadwalController> {
                           const SizedBox(
                             height: 32,
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            runSpacing: 10,
                             children: [
                               ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
@@ -188,6 +190,7 @@ class SetjadwalView extends GetView<SetjadwalController> {
                                 label: const Text('Simpan Jadwal'),
                               ),
                               Obx(() => Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       const Text("Loop Lagu Nasional"),
                                       const SizedBox(

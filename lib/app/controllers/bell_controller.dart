@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'dart:nativewrappers/_internal/vm/lib/ffi_native_type_patch.dart';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:bellsmkncampalagian/app/data/jadwal_model.dart';
@@ -101,7 +100,6 @@ class BellController extends GetxController {
   final _isBelumMasuk = true.obs;
   final _isLaguNasionalLoop = false.obs;
   final _isSudahPulang = false.obs;
-  
 
   //final _swapMarsPancasila = false.obs; // mars smk pancasila
 
@@ -223,9 +221,7 @@ class BellController extends GetxController {
       final ct = TimeOfDay.now();
       if (ct.hour > 7) {
         _isBelumMasuk.value = false;
-      }
-
-      else if (ct.hour == 7 && ct.minute >= 30) {
+      } else if (ct.hour == 7 && ct.minute >= 30) {
         _isBelumMasuk.value = false;
       } else {
         _isBelumMasuk.value = true;
@@ -264,7 +260,6 @@ class BellController extends GetxController {
               } else {
                 await play(j.tipe!);
               }
-
             }
           }
         });
@@ -304,11 +299,10 @@ class BellController extends GetxController {
     super.onInit();
   }
 
-
   // fungsi untuk putar sholawat
   void _playSholawat() {
     int indexSholawat = tipeBell.indexOf("sholawat_jibril");
-    if(_isBelumMasuk.value || isSudahPulang) {
+    if (_isBelumMasuk.value || isSudahPulang) {
       // belum masuk jadi bisa putar sholawat
       play(tipeBell[indexSholawat]);
     }
