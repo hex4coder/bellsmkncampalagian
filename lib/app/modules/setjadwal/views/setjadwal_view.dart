@@ -136,22 +136,24 @@ class SetjadwalView extends GetView<SetjadwalController> {
                           const SizedBox(
                             height: 8,
                           ),
-                          FormBuilderDropdown(
-                            decoration:
-                                const InputDecoration(labelText: 'Tipe Bell'),
-                            items: BellController.instance.tipeBell
-                                .map((e) => DropdownMenuItem(
-                                      value: e.toLowerCase(),
-                                      child: Text(e),
-                                    ))
-                                .toList(),
-                            onChanged: (String? selected) {
-                              if (selected != null) {
-                                controller.setSelectedTipe(selected);
-                              }
-                            },
-                            name: 'tipe',
-                            initialValue: controller.selectedTipe,
+                          Obx(
+                            () => FormBuilderDropdown(
+                              decoration:
+                                  const InputDecoration(labelText: 'Tipe Bell'),
+                              items: BellController.instance.tipeBell
+                                  .map((e) => DropdownMenuItem(
+                                        value: e.toLowerCase(),
+                                        child: Text(e),
+                                      ))
+                                  .toList(),
+                              onChanged: (String? selected) {
+                                if (selected != null) {
+                                  controller.setSelectedTipe(selected);
+                                }
+                              },
+                              name: 'tipe',
+                              initialValue: controller.selectedTipe,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           ElevatedButton.icon(
@@ -209,15 +211,31 @@ class SetjadwalView extends GetView<SetjadwalController> {
                             crossAxisAlignment: WrapCrossAlignment.center,
                             runSpacing: 10,
                             children: [
-                              ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 32, vertical: 16),
-                                ),
-                                onPressed: controller.submitForm,
-                                icon: const Icon(CupertinoIcons.calendar_today),
-                                label: const Text('Simpan Jadwal'),
-                              ),
+                              Obx(() => Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 32, vertical: 16),
+                                        ),
+                                        onPressed: controller.submitForm,
+                                        icon: const Icon(
+                                            CupertinoIcons.calendar_today),
+                                        label: Text(controller.isEditing
+                                            ? 'Update Jadwal'
+                                            : 'Simpan Jadwal'),
+                                      ),
+                                      if (controller.isEditing) ...[
+                                        const SizedBox(width: 8),
+                                        TextButton.icon(
+                                          onPressed: controller.cancelEditing,
+                                          icon: const Icon(Icons.cancel),
+                                          label: const Text('Batal'),
+                                        ),
+                                      ],
+                                    ],
+                                  )),
                               Obx(() => Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -329,18 +347,31 @@ class SetjadwalView extends GetView<SetjadwalController> {
                                   DataCell(Text(e.hari ?? '')),
                                   DataCell(Text(e.waktu ?? '')),
                                   DataCell(Text(e.tipe ?? '')),
-                                  DataCell(TextButton.icon(
-                                      onPressed: () => BellController.instance
-                                          .deleteJadwal(e),
-                                      icon: const Icon(
-                                        CupertinoIcons.delete,
-                                        size: 20,
-                                        color: Colors.red,
+                                  DataCell(Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(CupertinoIcons.pencil,
+                                            size: 20, color: Colors.blue),
+                                        onPressed: () =>
+                                            controller.startEditing(e),
+                                        tooltip: 'Edit',
                                       ),
-                                      label: const Text(
-                                        'Hapus',
-                                        style: TextStyle(color: Colors.red),
-                                      ))),
+                                      TextButton.icon(
+                                          onPressed: () => BellController
+                                              .instance
+                                              .deleteJadwal(e),
+                                          icon: const Icon(
+                                            CupertinoIcons.delete,
+                                            size: 20,
+                                            color: Colors.red,
+                                          ),
+                                          label: const Text(
+                                            'Hapus',
+                                            style: TextStyle(color: Colors.red),
+                                          )),
+                                    ],
+                                  )),
                                   // DataCell(
                                   //   BellController.instance._listCustomAssets.contains(e.tipe)
                                   //   ? IconButton(

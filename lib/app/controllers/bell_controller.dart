@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 final listBulan = [
   'Januari',
@@ -110,15 +111,16 @@ class BellController extends GetxController {
   final _loopAssets = <String>['sholawat_jibril'].obs;
   final _currentLoopIndex = 0.obs;
 
+  final _bundledAssets = <String>[].obs;
+  final _listLaguNasional = <String>[].obs;
+
   //final _swapMarsPancasila = false.obs; // mars smk pancasila
 
   Future<void> play(String selectedTipe) async {
     String path = '';
     // jika lagu acak
     // jika lagu acak
-    if (selectedTipe ==
-        BellController
-            .instance.tipeBell[BellController.instance.tipeBell.length - 1]) {
+    if (selectedTipe == 'lagu_nasional_acak') {
       final r = Random().nextInt(_listLaguNasional.length);
       final laguNasional = _listLaguNasional[r];
       path = 'sound/lagu_nasional/$laguNasional.mp3';
@@ -164,42 +166,9 @@ class BellController extends GetxController {
   String get currentTimePlaying => _currentTimePlaying.value;
   String get tanggalSekarang => _currentDate.value.getTanggal();
   String get hari => _currentDate.value.getHari().toLowerCase();
-  List<String> get tipeBell => [
-        'pelajar_pancasila',
-        'mars_smk',
-        'ayo_senam',
-        'sholawat_jibril',
-        '5_menit_awal_upacara',
-        '5_menit_awal_kegiatan_keagamaan',
-        '5_menit_awal_jam_ke_1',
-        '5_menit_akhir_istirahat',
-        '5_menit_akhir_istirahat_1',
-        '5_menit_akhir_istirahat_2',
-        'jam_ke_1',
-        'jam_ke_2',
-        'jam_ke_3',
-        'jam_ke_4',
-        'istirahat',
-        'istirahat_1',
-        'istirahat_2',
-        'jam_ke_5',
-        'jam_ke_6',
-        'jam_ke_7',
-        'jam_ke_8',
-        'jam_ke_9',
-        'jam_ke_10',
-        'jam_ke_11',
-        'jam_ke_12',
-        'jam_ke_13',
-        'jam_ke_14',
-        'akhir_pekan_1',
-        'akhir_pekan_2',
-        'akhir_pelajaran_1',
-        'akhir_pelajaran_2',
-        'lagu_nasional_acak',
-        ..._listCustomAssets
-      ];
+  List<String> get tipeBell => [..._bundledAssets, ..._listCustomAssets];
 
+  /*
   final List<String> _listLaguNasional = [
     'bagimu_negeri',
     'bangun_pemuda_pemudi',
@@ -208,6 +177,7 @@ class BellController extends GetxController {
     'maju_tak_gentar',
     'syukur_nasional'
   ];
+  */
 
   final String KEY_LOOP_ACTIVATED = 'loop-activated';
   final String KEY_LOOP_ASSET = 'loop-asset';
@@ -255,6 +225,100 @@ class BellController extends GetxController {
     List<dynamic>? stored = _box.read('custom_assets');
     if (stored != null) {
       _listCustomAssets.assignAll(stored.cast<String>());
+    }
+  }
+
+  Future<void> loadAssetsFromManifest() async {
+    try {
+      final manifestContent = await rootBundle.loadString('AssetManifest.json');
+      final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+
+      // Filter sound assets
+      final soundKeys = manifestMap.keys
+          .where((key) =>
+              key.contains('assets/sound/') &&
+              (key.endsWith('.mp3') || key.endsWith('.wav')))
+          .toList();
+
+      List<String> bundled = [];
+      List<String> nasional = [];
+
+      for (var key in soundKeys) {
+        // Example key: assets/sound/jam_ke_1.wav
+        // Example key: assets/sound/lagu_nasional/bagimu_negeri.mp3
+
+        if (key.contains('lagu_nasional')) {
+          // Extract filename without extension
+          String name =
+              key.split('/').last.replaceAll('.mp3', '').replaceAll('.wav', '');
+          nasional.add(name);
+        } else {
+          String name =
+              key.split('/').last.replaceAll('.mp3', '').replaceAll('.wav', '');
+          bundled.add(name);
+        }
+      }
+
+      // Add 'lagu_nasional_acak' manually as existing logic depends on it being in tipeBell?
+      // Actually existing code logic for 'lagu_nasional_acak' is:
+      // if (selectedTipe == BellController.instance.tipeBell[BellController.instance.tipeBell.length - 1])
+      // This is fragile. Ideally we should detect the string "lagu_nasional_acak".
+      // But for now, let's just ensure bundled has 'lagu_nasional_acak' if it was not a real file.
+      // Wait, 'lagu_nasional_acak' is NOT a file, it's a logic keyword.
+      // So we must append it.
+
+      bundled.add('lagu_nasional_acak');
+
+      _bundledAssets.assignAll(bundled);
+      _listLaguNasional.assignAll(nasional);
+    } catch (e) {
+      print("Error loading manifest: $e");
+      // Fallback if manifest fails (e.g. on some environments or setup issues)
+      if (_bundledAssets.isEmpty) {
+        _bundledAssets.assignAll([
+          'pelajar_pancasila',
+          'mars_smk',
+          'ayo_senam',
+          'sholawat_jibril',
+          '5_menit_awal_upacara',
+          '5_menit_awal_kegiatan_keagamaan',
+          '5_menit_awal_jam_ke_1',
+          '5_menit_akhir_istirahat',
+          '5_menit_akhir_istirahat_1',
+          '5_menit_akhir_istirahat_2',
+          'jam_ke_1',
+          'jam_ke_2',
+          'jam_ke_3',
+          'jam_ke_4',
+          'jam_ke_5',
+          'jam_ke_6',
+          'jam_ke_7',
+          'jam_ke_8',
+          'jam_ke_9',
+          'jam_ke_10',
+          'jam_ke_11',
+          'jam_ke_12',
+          'jam_ke_13',
+          'jam_ke_14',
+          'istirahat',
+          'istirahat_1',
+          'istirahat_2',
+          'akhir_pekan_1',
+          'akhir_pekan_2',
+          'akhir_pelajaran_1',
+          'akhir_pelajaran_2',
+          'lagu_nasional_acak'
+        ]);
+
+        _listLaguNasional.assignAll([
+          'bagimu_negeri',
+          'bangun_pemuda_pemudi',
+          'berkibarlah_benderaku',
+          'halo_halo_bandung',
+          'maju_tak_gentar',
+          'syukur_nasional'
+        ]);
+      }
     }
   }
 
@@ -425,6 +489,7 @@ class BellController extends GetxController {
       // check loop lagu nasional
       await checkLoopStatus();
       loadCustomAssets();
+      // await loadAssetsFromManifest(); // Don't reload manifest periodically, it's static in bundle
 
       final ct = TimeOfDay.now();
       if (ct.hour > 7) {
@@ -505,6 +570,10 @@ class BellController extends GetxController {
     });
 
     super.onInit();
+
+    // Initial load
+    loadCustomAssets();
+    loadAssetsFromManifest();
   }
 
   // fungsi untuk putar sholawat
@@ -559,6 +628,42 @@ class BellController extends GetxController {
     Get.snackbar(
       "Berhasil",
       "Jadwal berhasil disimpan",
+      backgroundColor: Colors.green.shade100,
+      colorText: Colors.green.shade900,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
+  Future<void> updateJadwal(Jadwal oldJadwal, Jadwal newJadwal) async {
+    List<Jadwal> allJadwal = await loadAllJadwal();
+
+    // Remove old
+    allJadwal.removeWhere((e) =>
+        e.hari == oldJadwal.hari &&
+        e.tipe == oldJadwal.tipe &&
+        e.waktu == oldJadwal.waktu);
+
+    // Add new
+    allJadwal.add(newJadwal);
+
+    await _box.write('jadwal', allJadwal);
+    await _box.save();
+
+    _listJadwal.assignAll(allJadwal);
+    List<Jadwal> list = [];
+
+    if (allJadwal.isNotEmpty) {
+      for (Jadwal jadwal in allJadwal) {
+        if (jadwal.hari == hari) {
+          list.add(jadwal);
+        }
+      }
+    }
+
+    _listJadwalToday.assignAll(list);
+    Get.snackbar(
+      "Berhasil",
+      "Jadwal berhasil diperbarui",
       backgroundColor: Colors.green.shade100,
       colorText: Colors.green.shade900,
       snackPosition: SnackPosition.BOTTOM,
