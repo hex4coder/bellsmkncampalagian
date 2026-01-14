@@ -1,9 +1,9 @@
 {
   "jadwal": [
     {
-      "hari":"senin",
-      "tipe":"ayo_senam",
-      "waktu":"07:20"
+      "hari": "senin",
+      "tipe": "ayo_senam",
+      "waktu": "07:20"
     },
     {
       "hari": "senin",
@@ -86,9 +86,9 @@
       "waktu": "14:55"
     },
     {
-      "hari":"selasa",
-      "tipe":"ayo_senam",
-      "waktu":"07:20"
+      "hari": "selasa",
+      "tipe": "ayo_senam",
+      "waktu": "07:20"
     },
     {
       "hari": "selasa",
@@ -175,11 +175,10 @@
       "tipe": "akhir_pelajaran_2",
       "waktu": "15:35"
     },
-
     {
-      "hari":"rabu",
-      "tipe":"ayo_senam",
-      "waktu":"07:20"
+      "hari": "rabu",
+      "tipe": "ayo_senam",
+      "waktu": "07:20"
     },
     {
       "hari": "rabu",
@@ -266,11 +265,10 @@
       "tipe": "akhir_pelajaran_1",
       "waktu": "15:35"
     },
-
     {
-      "hari":"kamis",
-      "tipe":"ayo_senam",
-      "waktu":"07:20"
+      "hari": "kamis",
+      "tipe": "ayo_senam",
+      "waktu": "07:20"
     },
     {
       "hari": "kamis",
@@ -358,9 +356,9 @@
       "waktu": "15:35"
     },
     {
-      "hari":"jumat",
-      "tipe":"ayo_senam",
-      "waktu":"07:20"
+      "hari": "jumat",
+      "tipe": "ayo_senam",
+      "waktu": "07:20"
     },
     {
       "hari": "jumat",
@@ -422,12 +420,14 @@
       "tipe": "jam_ke_7",
       "waktu": "14:15"
     },
-
     {
       "hari": "jumat",
       "tipe": "akhir_pekan_1",
       "waktu": "14:55"
     }
   ],
-  "loop-nasional": true
+  "loop-active": true,
+  "loop-assets": [
+    "sholawat_jibril"
+  ]
 }

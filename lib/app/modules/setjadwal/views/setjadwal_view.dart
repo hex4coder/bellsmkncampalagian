@@ -15,6 +15,29 @@ class SetjadwalView extends GetView<SetjadwalController> {
       appBar: AppBar(
         title: const Text('Jadwal / Waktu Bell'),
         centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'import') {
+                BellController.instance.importDatabase();
+              } else if (value == 'export') {
+                BellController.instance.exportDatabase();
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem(
+                  value: 'import',
+                  child: Text('Import Database'),
+                ),
+                const PopupMenuItem(
+                  value: 'export',
+                  child: Text('Export Database'),
+                ),
+              ];
+            },
+          ),
+        ],
       ),
       body: Obx(
           () => controller.showForm ? buildForm(context) : buildAuth(context)),
@@ -130,6 +153,12 @@ class SetjadwalView extends GetView<SetjadwalController> {
                             name: 'tipe',
                             initialValue: controller.selectedTipe,
                           ),
+                          const SizedBox(height: 8),
+                          ElevatedButton.icon(
+                            onPressed: () => BellController.instance.addAudio(),
+                            icon: const Icon(Icons.audio_file),
+                            label: const Text('Tambah Audio'),
+                          ),
                           const SizedBox(
                             height: 4,
                           ),
@@ -192,7 +221,7 @@ class SetjadwalView extends GetView<SetjadwalController> {
                               Obx(() => Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Text("Loop Lagu Nasional"),
+                                      const Text("Loop Aktif"),
                                       const SizedBox(
                                         width: 10,
                                       ),
@@ -201,7 +230,57 @@ class SetjadwalView extends GetView<SetjadwalController> {
                                               .instance.isLoopActivated,
                                           onChanged: (bool v) => BellController
                                               .instance
-                                              .setLoopIsActive(v)),
+                                              .userToggleLoop(v)),
+                                      IconButton(
+                                        icon: const Icon(Icons.settings),
+                                        onPressed: () {
+                                          Get.defaultDialog(
+                                            title: "Pilih Asset Loop",
+                                            content: SizedBox(
+                                              height: 300,
+                                              width: 300,
+                                              child: Obx(() => ListView(
+                                                    shrinkWrap: true,
+                                                    children: BellController
+                                                        .instance.tipeBell
+                                                        .map((asset) {
+                                                      final isSelected =
+                                                          BellController
+                                                              .instance
+                                                              .loopAssets
+                                                              .contains(asset);
+                                                      return CheckboxListTile(
+                                                        title: Text(asset),
+                                                        value: isSelected,
+                                                        onChanged:
+                                                            (bool? checked) {
+                                                          List<String> current =
+                                                              List.from(
+                                                                  BellController
+                                                                      .instance
+                                                                      .loopAssets);
+                                                          if (checked == true) {
+                                                            current.add(asset);
+                                                          } else {
+                                                            current
+                                                                .remove(asset);
+                                                          }
+                                                          BellController
+                                                              .instance
+                                                              .setLoopAssets(
+                                                                  current);
+                                                        },
+                                                      );
+                                                    }).toList(),
+                                                  )),
+                                            ),
+                                            confirm: TextButton(
+                                              onPressed: () => Get.back(),
+                                              child: const Text("Tutup"),
+                                            ),
+                                          );
+                                        },
+                                      )
                                     ],
                                   )),
                             ],
@@ -262,6 +341,14 @@ class SetjadwalView extends GetView<SetjadwalController> {
                                         'Hapus',
                                         style: TextStyle(color: Colors.red),
                                       ))),
+                                  // DataCell(
+                                  //   BellController.instance._listCustomAssets.contains(e.tipe)
+                                  //   ? IconButton(
+                                  //       icon: Icon(Icons.remove_circle, color: Colors.red),
+                                  //       onPressed: () => BellController.instance.deleteAudio(e.tipe!),
+                                  //     )
+                                  //   : Container()
+                                  // ),
                                 ]))
                             .toList()),
                   ),

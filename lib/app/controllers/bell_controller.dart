@@ -8,6 +8,10 @@ import 'package:bellsmkncampalagian/app/data/jadwal_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:convert';
 
 final listBulan = [
   'Januari',
@@ -101,10 +105,16 @@ class BellController extends GetxController {
   final _isLaguNasionalLoop = false.obs;
   final _isSudahPulang = false.obs;
 
+  final _listCustomAssets = <String>[].obs;
+  // final _loopAsset = 'sholawat_jibril'.obs; // Deprecated
+  final _loopAssets = <String>['sholawat_jibril'].obs;
+  final _currentLoopIndex = 0.obs;
+
   //final _swapMarsPancasila = false.obs; // mars smk pancasila
 
   Future<void> play(String selectedTipe) async {
     String path = '';
+    // jika lagu acak
     // jika lagu acak
     if (selectedTipe ==
         BellController
@@ -112,22 +122,37 @@ class BellController extends GetxController {
       final r = Random().nextInt(_listLaguNasional.length);
       final laguNasional = _listLaguNasional[r];
       path = 'sound/lagu_nasional/$laguNasional.mp3';
-    }
-    // jika bukan lagu acak nasional
-    else {
-      path = 'sound/$selectedTipe.wav';
+      await audioPlayer.setSourceAsset(path);
+    } else {
+      // Cek apakah custom asset (ada path separator atau extension yang kita tahu disimpan di dokumen)
+      // Logikanya: jika ada di listCustomAssets, maka itu local file
+      if (_listCustomAssets.contains(selectedTipe)) {
+        final dir = await getApplicationDocumentsDirectory();
+        File file = File('${dir.path}/custom_sounds/$selectedTipe');
+        if (await file.exists()) {
+          await audioPlayer.setSourceDeviceFile(file.path);
+        }
+      } else {
+        path = 'sound/$selectedTipe.wav';
+        await audioPlayer.setSourceAsset(path);
+      }
     }
 
-    await audioPlayer.setSourceAsset(path);
     await audioPlayer.setVolume(1.0);
     if (audioPlayer.state == PlayerState.playing) {
       await audioPlayer.stop();
     }
-    await audioPlayer.play(AssetSource(path));
+    await audioPlayer.resume();
   }
 
   static BellController get instance => Get.find<BellController>();
+
+  List<String> get loopAssets => _loopAssets;
+  String get loopAsset =>
+      _loopAssets.isNotEmpty ? _loopAssets.first : ''; // Fallback for safety
   bool get isSudahPulang => _isSudahPulang.value;
+  int get currentLoopIndex => _currentLoopIndex.value;
+
   bool get isLoopActivated => _isLaguNasionalLoop.value;
   bool get isPlayingBelumMasuk => _isBelumMasuk.value;
   bool get isLoading => _isLoading.value;
@@ -172,6 +197,7 @@ class BellController extends GetxController {
         'akhir_pelajaran_1',
         'akhir_pelajaran_2',
         'lagu_nasional_acak',
+        ..._listCustomAssets
       ];
 
   final List<String> _listLaguNasional = [
@@ -184,17 +210,197 @@ class BellController extends GetxController {
   ];
 
   final String KEY_LOOP_ACTIVATED = 'loop-activated';
+  final String KEY_LOOP_ASSET = 'loop-asset';
 
+  // update status loop lagu nasional
   // update status loop lagu nasional
   void setLoopIsActive(bool loop) {
     _isLaguNasionalLoop.value = loop;
     _box.write(KEY_LOOP_ACTIVATED, loop).then((value) => _box.save());
   }
 
+  void userToggleLoop(bool loop) {
+    setLoopIsActive(loop);
+    Get.snackbar(
+      "Berhasil",
+      "Loop ${loop ? 'Diaktifkan' : 'Dinonaktifkan'}",
+      backgroundColor: Colors.green.shade100,
+      colorText: Colors.green.shade900,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
   // check loop status
   Future checkLoopStatus() async {
     bool? isLoop = _box.read(KEY_LOOP_ACTIVATED);
     setLoopIsActive(isLoop ?? false);
+
+    dynamic savedLoopAssets = _box.read(KEY_LOOP_ASSET);
+    if (savedLoopAssets != null) {
+      if (savedLoopAssets is List) {
+        _loopAssets.assignAll(savedLoopAssets.cast<String>());
+      } else if (savedLoopAssets is String) {
+        _loopAssets.assignAll([savedLoopAssets]);
+      }
+    }
+  }
+
+  void setLoopAssets(List<String> assets) {
+    _loopAssets.assignAll(assets);
+    _box.write(KEY_LOOP_ASSET, assets).then((value) => _box.save());
+  }
+
+  // Load custom assets
+  void loadCustomAssets() {
+    List<dynamic>? stored = _box.read('custom_assets');
+    if (stored != null) {
+      _listCustomAssets.assignAll(stored.cast<String>());
+    }
+  }
+
+  // Add custom asset
+  Future<void> addAudio() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp3', 'wav'],
+    );
+
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      final appDir = await getApplicationDocumentsDirectory();
+      final customDir = Directory('${appDir.path}/custom_sounds');
+
+      if (!await customDir.exists()) {
+        await customDir.create(recursive: true);
+      }
+
+      String fileName = result.files.single.name;
+      // Sanitize filename or ensure uniqueness if needed, acting simple for now
+
+      String newPath = '${customDir.path}/$fileName';
+      await file.copy(newPath);
+
+      if (!_listCustomAssets.contains(fileName)) {
+        _listCustomAssets.add(fileName);
+        await _box.write('custom_assets', _listCustomAssets);
+        await _box.save();
+      }
+      Get.snackbar(
+        'Berhasil',
+        'Audio berhasil ditambahkan',
+        backgroundColor: Colors.green.shade100,
+        colorText: Colors.green.shade900,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<void> deleteAudio(String fileName) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    File file = File('${appDir.path}/custom_sounds/$fileName');
+
+    if (await file.exists()) {
+      await file.delete();
+    }
+
+    _listCustomAssets.remove(fileName);
+    await _box.write('custom_assets', _listCustomAssets);
+    await _box.save();
+    Get.snackbar(
+      'Berhasil',
+      'Audio berhasil dihapus',
+      backgroundColor: Colors.green.shade100,
+      colorText: Colors.green.shade900,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
+  // Import Database from JSON
+  // Import Database from JSON
+  Future<void> importDatabase() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+
+    if (result != null) {
+      try {
+        File file = File(result.files.single.path!);
+        String content = await file.readAsString();
+        Map<String, dynamic> jsonMap = jsonDecode(content);
+
+        // Handle jadwal
+        if (jsonMap.containsKey('jadwal')) {
+          List<dynamic> jsonList = jsonMap['jadwal'];
+          List<Jadwal> newJadwal =
+              jsonList.map((e) => Jadwal.fromJson(e)).toList();
+          await _box.write('jadwal', newJadwal);
+          _listJadwal.assignAll(newJadwal);
+          _listJadwalToday.assignAll(await loadAllJadwalByHari(hari));
+        }
+
+        // Handle loop-active
+        if (jsonMap.containsKey('loop-active')) {
+          bool loopActive = jsonMap['loop-active'];
+          setLoopIsActive(loopActive);
+        }
+
+        await _box.save();
+        Get.snackbar(
+          'Berhasil',
+          'Database berhasil diimport',
+          backgroundColor: Colors.green.shade100,
+          colorText: Colors.green.shade900,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } catch (e) {
+        Get.snackbar(
+          'Error',
+          'Gagal import database: $e',
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.red.shade900,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    }
+  }
+
+  // Export Database to JSON
+  Future<void> exportDatabase() async {
+    try {
+      final data = <String, dynamic>{
+        'jadwal': _listJadwal.map((e) => e.toJson()).toList(),
+        'loop-active': isLoopActivated,
+        'loop-assets': loopAssets,
+      };
+
+      String jsonString = jsonEncode(data);
+      String? outputFile = await FilePicker.platform.saveFile(
+          dialogTitle: 'Simpan Database',
+          fileName: 'jadwal_backup.json',
+          type: FileType.custom,
+          allowedExtensions: ['json']);
+
+      if (outputFile != null) {
+        File file = File(outputFile);
+        await file.writeAsString(jsonString);
+        Get.snackbar(
+          'Berhasil',
+          'Database berhasil diexport',
+          backgroundColor: Colors.green.shade100,
+          colorText: Colors.green.shade900,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Gagal export database: $e',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   // update status pulang
@@ -213,10 +419,12 @@ class BellController extends GetxController {
   void onInit() {
     Timer.periodic(const Duration(seconds: 5), (timer) async {
       _listJadwal.assignAll(await loadAllJadwal());
+
       _listJadwalToday.assignAll(await loadAllJadwalByHari(hari));
 
       // check loop lagu nasional
       await checkLoopStatus();
+      loadCustomAssets();
 
       final ct = TimeOfDay.now();
       if (ct.hour > 7) {
@@ -300,11 +508,23 @@ class BellController extends GetxController {
   }
 
   // fungsi untuk putar sholawat
-  void _playSholawat() {
-    int indexSholawat = tipeBell.indexOf("sholawat_jibril");
+  // fungsi untuk putar sholawat / loop sound
+  // fungsi untuk putar sholawat / loop sound
+  void _playSholawat() async {
     if (_isBelumMasuk.value || isSudahPulang) {
-      // belum masuk jadi bisa putar sholawat
-      play(tipeBell[indexSholawat]);
+      if (_loopAssets.isEmpty) return;
+
+      // Get current asset
+      String assetToPlay = _loopAssets[_currentLoopIndex.value];
+
+      await play(assetToPlay);
+
+      // Prepare index for next play
+      int nextIndex = _currentLoopIndex.value + 1;
+      if (nextIndex >= _loopAssets.length) {
+        nextIndex = 0;
+      }
+      _currentLoopIndex.value = nextIndex;
     }
   }
 
@@ -336,6 +556,13 @@ class BellController extends GetxController {
     }
 
     _listJadwalToday.assignAll(list);
+    Get.snackbar(
+      "Berhasil",
+      "Jadwal berhasil disimpan",
+      backgroundColor: Colors.green.shade100,
+      colorText: Colors.green.shade900,
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
 
   Future<void> deleteJadwal(Jadwal jadwal) async {
