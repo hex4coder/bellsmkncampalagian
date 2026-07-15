@@ -8,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/dashboard_controller.dart';
 
 class DashboardView extends GetView<DashboardController> {
-  const DashboardView({Key? key}) : super(key: key);
+  const DashboardView({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +32,7 @@ class DashboardView extends GetView<DashboardController> {
                     ),
                   ),
                   Text(
-                    'Bell Smkn Campalagian v1.0',
+                    'Bell Smkn Campalagian v1.1',
                     style: GoogleFonts.pacifico(
                       fontWeight: FontWeight.w500,
                       fontSize: 32,
@@ -44,14 +44,14 @@ class DashboardView extends GetView<DashboardController> {
                   ),
                   Obx(() => Text(
                         BellController.instance.tanggalSekarang,
-                        style: Theme.of(context).textTheme.headline3!.copyWith(
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
                               fontWeight: FontWeight.normal,
                               color: Colors.black,
                             ),
                       )),
                   Obx(() => Text(
                         BellController.instance.jamSekarang,
-                        style: Theme.of(context).textTheme.headline1!.copyWith(
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -85,7 +85,7 @@ class DashboardView extends GetView<DashboardController> {
                             ),
                             Obx(
                               () => Text(
-                                'Bell hari ini : ${BellController.instance.hari} ${BellController.instance.isLaguNasionalLoop ? "=> L" : "=> NL"}',
+                                'Bell hari ini : ${BellController.instance.hari} ${BellController.instance.isLoopActivated ? "=> L" : "=> NL"}',
                                 style: GoogleFonts.pacifico(
                                   color: Theme.of(context).primaryColor,
                                 ),

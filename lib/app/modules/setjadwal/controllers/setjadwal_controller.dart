@@ -20,7 +20,11 @@ class SetjadwalController extends GetxController {
   final AudioPlayer audioPlayer = AudioPlayer();
   final fbKey = GlobalKey<FormBuilderState>();
   final Rx<TimeOfDay> _currentTimeSelected = Rx<TimeOfDay>(TimeOfDay.now());
-  final RxString _selectedTipe = RxString(BellController.instance.tipeBell[0]);
+  final RxString _selectedTipe = RxString(
+      BellController.instance.tipeBell.isNotEmpty
+          ? BellController.instance.tipeBell[0]
+          : '');
+  final Rx<Jadwal?> _editingJadwal = Rx<Jadwal?>(null); // State for editing
   final _isPlaying = false.obs;
   final _showForm = false.obs;
   final TextEditingController passwordController = TextEditingController();
@@ -39,12 +43,30 @@ class SetjadwalController extends GetxController {
   String get selectedTipe => _selectedTipe.value;
   bool get isPlaying => _isPlaying.value;
   bool get showForm => _showForm.value;
+  bool get isEditing => _editingJadwal.value != null;
+  Jadwal? get editingJadwal => _editingJadwal.value;
 
   @override
   void onInit() {
     audioPlayer.onPlayerStateChanged.listen((event) {
       _isPlaying.value = event == PlayerState.playing;
     });
+
+    // Listen to BellController assets changes
+    // Not strictly needed if TipeBell is Obx in UI and selectedTipe logic is safe.
+
+    // Better: listen to tipeBell changes implicitly or explicitly?
+    // tipeBell is a getter derived from _bundledAssets and _listCustomAssets.
+    // We can just rely on Obx in UI, but for specific logic:
+    if (_selectedTipe.value.isEmpty &&
+        BellController.instance.tipeBell.isNotEmpty) {
+      _selectedTipe.value = BellController.instance.tipeBell[0];
+    }
+
+    // We should listen to the underlying list in BellController to auto-select first item when loaded
+    // But BellController doesn't expose the RxList directly via getter (it exposes List<String>).
+    // Let's just fix the initial crash first. The UI dropdown will handle the rest via Obx.
+
     super.onInit();
   }
 
@@ -78,10 +100,21 @@ class SetjadwalController extends GetxController {
     await audioPlayer.stop();
     await audioPlayer.setVolume(1.0);
 
+    // Guard against empty tipeBell
+    if (BellController.instance.tipeBell.isEmpty) {
+      Get.snackbar('Error', 'Tidak ada asset audio tersedia.');
+      return;
+    }
+
     // jika lagu acak
-    if (selectedTipe ==
-        BellController
-            .instance.tipeBell[BellController.instance.tipeBell.length - 1]) {
+    if (selectedTipe == 'lagu_nasional_acak' ||
+        (BellController.instance.tipeBell.isNotEmpty &&
+            selectedTipe ==
+                BellController.instance
+                    .tipeBell[BellController.instance.tipeBell.length - 1])) {
+      // Fallback logic if 'lagu_nasional_acak' string is used or if it's the last item (legacy)
+      // Ideally we rely on the string check now.
+
       final r = Random().nextInt(_listLaguNasional.length);
       final laguNasional = _listLaguNasional[r];
 
@@ -108,11 +141,59 @@ class SetjadwalController extends GetxController {
     super.onClose();
   }
 
+  void startEditing(Jadwal jadwal) {
+    _editingJadwal.value = jadwal;
+
+    // Populate form fields
+    if (fbKey.currentState != null) {
+      fbKey.currentState!.patchValue({
+        'hari': jadwal.hari,
+        'tipe': jadwal.tipe,
+      });
+    }
+
+    // Set time
+    if (jadwal.waktu != null) {
+      final parts = jadwal.waktu!.split(':');
+      if (parts.length == 2) {
+        _currentTimeSelected.value = TimeOfDay(
+            hour: int.tryParse(parts[0]) ?? 0,
+            minute: int.tryParse(parts[1]) ?? 0);
+      }
+    }
+
+    // Set selected tipe for dropdown sync
+    if (jadwal.tipe != null) {
+      setSelectedTipe(jadwal.tipe!);
+    }
+
+    // Scroll to form (handled by UI state change usually, assuming form is visible)
+  }
+
+  void cancelEditing() {
+    _editingJadwal.value = null;
+    fbKey.currentState?.reset();
+    _currentTimeSelected.value = TimeOfDay.now();
+    // Reset selected tipe to default
+    if (BellController.instance.tipeBell.isNotEmpty) {
+      setSelectedTipe(BellController.instance.tipeBell[0]);
+    }
+  }
+
   void submitForm() async {
     if (fbKey.currentState!.saveAndValidate()) {
       Map<String, dynamic> map = Map.from(fbKey.currentState!.value);
       map.putIfAbsent('waktu', () => jam);
-      await BellController.instance.saveNewJadwal(Jadwal.fromJson(map));
+
+      Jadwal newJadwalData = Jadwal.fromJson(map);
+
+      if (isEditing) {
+        await BellController.instance
+            .updateJadwal(_editingJadwal.value!, newJadwalData);
+        cancelEditing(); // Reset after update
+      } else {
+        await BellController.instance.saveNewJadwal(newJadwalData);
+      }
     }
   }
 }
