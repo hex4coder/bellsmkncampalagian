@@ -272,7 +272,7 @@ class BellController extends GetxController {
       _bundledAssets.assignAll(bundled);
       _listLaguNasional.assignAll(nasional);
     } catch (e) {
-      print("Error loading manifest: $e");
+      debugPrint("Error loading manifest: $e");
       // Fallback if manifest fails (e.g. on some environments or setup issues)
       if (_bundledAssets.isEmpty) {
         _bundledAssets.assignAll([
