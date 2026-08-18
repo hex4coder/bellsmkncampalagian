@@ -15,6 +15,29 @@ class SetjadwalView extends GetView<SetjadwalController> {
       appBar: AppBar(
         title: const Text('Jadwal / Waktu Bell'),
         centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'import') {
+                BellController.instance.importDatabase();
+              } else if (value == 'export') {
+                BellController.instance.exportDatabase();
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem(
+                  value: 'import',
+                  child: Text('Import Database'),
+                ),
+                const PopupMenuItem(
+                  value: 'export',
+                  child: Text('Export Database'),
+                ),
+              ];
+            },
+          ),
+        ],
       ),
       body: Obx(
           () => controller.showForm ? buildForm(context) : buildAuth(context)),
@@ -113,22 +136,30 @@ class SetjadwalView extends GetView<SetjadwalController> {
                           const SizedBox(
                             height: 8,
                           ),
-                          FormBuilderDropdown(
-                            decoration:
-                                const InputDecoration(labelText: 'Tipe Bell'),
-                            items: BellController.instance.tipeBell
-                                .map((e) => DropdownMenuItem(
-                                      value: e.toLowerCase(),
-                                      child: Text(e),
-                                    ))
-                                .toList(),
-                            onChanged: (String? selected) {
-                              if (selected != null) {
-                                controller.setSelectedTipe(selected);
-                              }
-                            },
-                            name: 'tipe',
-                            initialValue: controller.selectedTipe,
+                          Obx(
+                            () => FormBuilderDropdown(
+                              decoration:
+                                  const InputDecoration(labelText: 'Tipe Bell'),
+                              items: BellController.instance.tipeBell
+                                  .map((e) => DropdownMenuItem(
+                                        value: e.toLowerCase(),
+                                        child: Text(e),
+                                      ))
+                                  .toList(),
+                              onChanged: (String? selected) {
+                                if (selected != null) {
+                                  controller.setSelectedTipe(selected);
+                                }
+                              },
+                              name: 'tipe',
+                              initialValue: controller.selectedTipe,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton.icon(
+                            onPressed: () => BellController.instance.addAudio(),
+                            icon: const Icon(Icons.audio_file),
+                            label: const Text('Tambah Audio'),
                           ),
                           const SizedBox(
                             height: 4,
@@ -175,30 +206,99 @@ class SetjadwalView extends GetView<SetjadwalController> {
                           const SizedBox(
                             height: 32,
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            runSpacing: 10,
                             children: [
-                              ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 32, vertical: 16),
-                                ),
-                                onPressed: controller.submitForm,
-                                icon: const Icon(CupertinoIcons.calendar_today),
-                                label: const Text('Simpan Jadwal'),
-                              ),
                               Obx(() => Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Text("Loop Lagu Nasional"),
+                                      ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 32, vertical: 16),
+                                        ),
+                                        onPressed: controller.submitForm,
+                                        icon: const Icon(
+                                            CupertinoIcons.calendar_today),
+                                        label: Text(controller.isEditing
+                                            ? 'Update Jadwal'
+                                            : 'Simpan Jadwal'),
+                                      ),
+                                      if (controller.isEditing) ...[
+                                        const SizedBox(width: 8),
+                                        TextButton.icon(
+                                          onPressed: controller.cancelEditing,
+                                          icon: const Icon(Icons.cancel),
+                                          label: const Text('Batal'),
+                                        ),
+                                      ],
+                                    ],
+                                  )),
+                              Obx(() => Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text("Loop Aktif"),
                                       const SizedBox(
                                         width: 10,
                                       ),
                                       Switch.adaptive(
                                           value: BellController
-                                              .instance.isLaguNasionalLoop,
+                                              .instance.isLoopActivated,
                                           onChanged: (bool v) => BellController
                                               .instance
-                                              .setLoopLaguNasional(v)),
+                                              .userToggleLoop(v)),
+                                      IconButton(
+                                        icon: const Icon(Icons.settings),
+                                        onPressed: () {
+                                          Get.defaultDialog(
+                                            title: "Pilih Asset Loop",
+                                            content: SizedBox(
+                                              height: 300,
+                                              width: 300,
+                                              child: Obx(() => ListView(
+                                                    shrinkWrap: true,
+                                                    children: BellController
+                                                        .instance.tipeBell
+                                                        .map((asset) {
+                                                      final isSelected =
+                                                          BellController
+                                                              .instance
+                                                              .loopAssets
+                                                              .contains(asset);
+                                                      return CheckboxListTile(
+                                                        title: Text(asset),
+                                                        value: isSelected,
+                                                        onChanged:
+                                                            (bool? checked) {
+                                                          List<String> current =
+                                                              List.from(
+                                                                  BellController
+                                                                      .instance
+                                                                      .loopAssets);
+                                                          if (checked == true) {
+                                                            current.add(asset);
+                                                          } else {
+                                                            current
+                                                                .remove(asset);
+                                                          }
+                                                          BellController
+                                                              .instance
+                                                              .setLoopAssets(
+                                                                  current);
+                                                        },
+                                                      );
+                                                    }).toList(),
+                                                  )),
+                                            ),
+                                            confirm: TextButton(
+                                              onPressed: () => Get.back(),
+                                              child: const Text("Tutup"),
+                                            ),
+                                          );
+                                        },
+                                      )
                                     ],
                                   )),
                             ],
@@ -247,18 +347,39 @@ class SetjadwalView extends GetView<SetjadwalController> {
                                   DataCell(Text(e.hari ?? '')),
                                   DataCell(Text(e.waktu ?? '')),
                                   DataCell(Text(e.tipe ?? '')),
-                                  DataCell(TextButton.icon(
-                                      onPressed: () => BellController.instance
-                                          .deleteJadwal(e),
-                                      icon: const Icon(
-                                        CupertinoIcons.delete,
-                                        size: 20,
-                                        color: Colors.red,
+                                  DataCell(Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(CupertinoIcons.pencil,
+                                            size: 20, color: Colors.blue),
+                                        onPressed: () =>
+                                            controller.startEditing(e),
+                                        tooltip: 'Edit',
                                       ),
-                                      label: const Text(
-                                        'Hapus',
-                                        style: TextStyle(color: Colors.red),
-                                      ))),
+                                      TextButton.icon(
+                                          onPressed: () => BellController
+                                              .instance
+                                              .deleteJadwal(e),
+                                          icon: const Icon(
+                                            CupertinoIcons.delete,
+                                            size: 20,
+                                            color: Colors.red,
+                                          ),
+                                          label: const Text(
+                                            'Hapus',
+                                            style: TextStyle(color: Colors.red),
+                                          )),
+                                    ],
+                                  )),
+                                  // DataCell(
+                                  //   BellController.instance._listCustomAssets.contains(e.tipe)
+                                  //   ? IconButton(
+                                  //       icon: Icon(Icons.remove_circle, color: Colors.red),
+                                  //       onPressed: () => BellController.instance.deleteAudio(e.tipe!),
+                                  //     )
+                                  //   : Container()
+                                  // ),
                                 ]))
                             .toList()),
                   ),
